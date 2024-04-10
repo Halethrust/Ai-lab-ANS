@@ -1,0 +1,52 @@
+pub:
+#!/usr/bin/env python3
+
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
+
+def publish_images():
+    pub = rospy.Publisher('image_topic', Image, queue_size=10)
+    rospy.init_node('image_publisher', anonymous=True)
+    rate = rospy.Rate(10)  # 10Hz
+    bridge = CvBridge()
+    
+    img1 = cv2.imread('image1.jpg')
+    img2 = cv2.imread('image2.jpg')
+    diff_img = cv2.absdiff(img1, img2)
+
+    while not rospy.is_shutdown():
+        rospy.loginfo('Publishing images')
+        pub.publish(bridge.cv2_to_imgmsg(diff_img))
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        publish_images()
+    except rospy.ROSInterruptException:
+        pass
+sub:
+#!/usr/bin/env python3
+
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
+
+def callback(data):
+    bridge = CvBridge()
+    diff_img = bridge.imgmsg_to_cv2(data)
+    
+    # Perform any processing on the received image
+    cv2.imshow('Difference Image', diff_img)
+    cv2.waitKey(1)  # Adjust delay as needed
+
+def receive_images():
+    rospy.init_node('image_subscriber', anonymous=True)
+    rospy.Subscriber('image_topic', Image, callback)
+    rospy.spin()
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    receive_images()
