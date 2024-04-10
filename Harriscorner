@@ -1,0 +1,44 @@
+A) Harris corner image
+import cv2
+import numpy as np
+
+# Load the input image
+image = cv2.imread('img1.jpg')
+
+# Convert the image to grayscale
+operatedImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Convert data type to 32-bit floating point
+operatedImage = np.float32(operatedImage)
+
+# Apply the Harris Corner Detection algorithm
+dest = cv2.cornerHarris(operatedImage, 2, 5, 0.07)
+
+# Dilate the corners to make them more visible
+dest = cv2.dilate(dest, None)
+
+# Mark the detected corners on the original image
+image[dest > 0.01 * dest.max()] = [0, 0, 255]
+
+# Display the image with marked corners
+cv2.imshow('Image with Borders', image)
+
+# Wait for a key press and close the window if ESC is pressed
+if cv2.waitKey(0) & 0xff == 27:
+    cv2.destroyAllWindows()
+
+B) Video 
+import numpy as np
+import cv2 as cv
+cap= cv.VideoCapture(0,cv.CAP_DSHOW)
+while 1:
+ ret, img = cap.read()
+ gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+ gray = np.float32(gray)
+ dst = cv.cornerHarris(gray, 2, 21, 0)
+ # result is dilated for marking the corners, not important
+ dst = cv.dilate(dst, None)
+ # Threshold for an optimal value, it may vary depending on the image.
+ img[dst > 0.01 * dst.max()] = [2, 5, 255]
+ cv.imshow('dst', img)
+ cv.waitKey(0)
