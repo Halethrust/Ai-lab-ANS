@@ -1,0 +1,65 @@
+import cv2
+import numpy as np
+
+# Load images
+note_template = cv2.imread('note_template.jpg', cv2.IMREAD_GRAYSCALE)
+phone_template = cv2.imread('phone_template.jpg', cv2.IMREAD_GRAYSCALE)
+file_template = cv2.imread('file_template.jpg', cv2.IMREAD_GRAYSCALE)
+pen_template = cv2.imread('pen_template.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Initialize ORB detector
+orb = cv2.ORB_create()
+
+# Find keypoints and descriptors for templates
+keypoints_note, descriptors_note = orb.detectAndCompute(note_template, None)
+keypoints_phone, descriptors_phone = orb.detectAndCompute(phone_template, None)
+keypoints_file, descriptors_file = orb.detectAndCompute(file_template, None)
+keypoints_pen, descriptors_pen = orb.detectAndCompute(pen_template, None)
+
+# Initialize feature matcher
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+# Initialize video capture
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Convert frame to grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Detect keypoints and descriptors in the frame
+    keypoints_frame, descriptors_frame = orb.detectAndCompute(gray, None)
+
+    # Match descriptors for each template
+    matches_note = bf.match(descriptors_note, descriptors_frame)
+    matches_phone = bf.match(descriptors_phone, descriptors_frame)
+    matches_file = bf.match(descriptors_file, descriptors_frame)
+    matches_pen = bf.match(descriptors_pen, descriptors_frame)
+
+    # Sort matches by distance
+    matches_note = sorted(matches_note, key=lambda x: x.distance)
+    matches_phone = sorted(matches_phone, key=lambda x: x.distance)
+    matches_file = sorted(matches_file, key=lambda x: x.distance)
+    matches_pen = sorted(matches_pen, key=lambda x: x.distance)
+
+    # Draw matches on the frame
+    frame_with_matches_note = cv2.drawMatches(note_template, keypoints_note, frame, keypoints_frame, matches_note[:10], None)
+    frame_with_matches_phone = cv2.drawMatches(phone_template, keypoints_phone, frame, keypoints_frame, matches_phone[:10], None)
+    frame_with_matches_file = cv2.drawMatches(file_template, keypoints_file, frame, keypoints_frame, matches_file[:10], None)
+    frame_with_matches_pen = cv2.drawMatches(pen_template, keypoints_pen, frame, keypoints_frame, matches_pen[:10], None)
+
+    # Display the result
+    cv2.imshow('Note Detection', frame_with_matches_note)
+    cv2.imshow('Phone Detection', frame_with_matches_phone)
+    cv2.imshow('File Detection', frame_with_matches_file)
+    cv2.imshow('Pen Detection', frame_with_matches_pen)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release video capture and close windows
+cap.release()
+cv2.destroyAllWindows()
