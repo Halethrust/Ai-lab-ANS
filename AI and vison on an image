@@ -1,0 +1,50 @@
+Publisher Node:
+#!/usr/bin/env python3
+
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
+
+def publish_message():
+    pub = rospy.Publisher('video_frames', Image, queue_size=10)
+    rospy.init_node('video_pub_py', anonymous=True)
+    rate = rospy.Rate(10) # 10hz
+    cap = cv2.imread('/home/rae/Downloads/black screen.png')
+    br = CvBridge()
+    
+    while not rospy.is_shutdown():
+        current_frame = cv2.putText(cap, "AI & VISION", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2, cv2.LINE_AA)
+        rospy.loginfo('Publishing video frame')
+        pub.publish(br.cv2_to_imgmsg(current_frame))
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        publish_message()
+    except rospy.ROSInterruptException:
+        pass
+
+Subscriber Node:
+#!/usr/bin/env python3
+
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
+
+def callback(data):
+    br = CvBridge()
+    rospy.loginfo("Receiving video frame")
+    current_frame = br.imgmsg_to_cv2(data)
+    cv2.imshow("camera", current_frame)
+    cv2.waitKey(1)
+
+def receive_message():
+    rospy.init_node('video_sub_py', anonymous=True)
+    rospy.Subscriber('video_frames', Image, callback)
+    rospy.spin()
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    receive_message()
