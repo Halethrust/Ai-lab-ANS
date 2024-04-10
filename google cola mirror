@@ -1,0 +1,33 @@
+google collab:
+mirror
+1)
+from google.colab import files
+uploaded = files.upload()
+2)
+!pip install pillow
+3)
+from PIL import Image
+
+# Load the image
+image_path = 'your_image.jpg'  # Replace 'your_image.jpg' with the filename of your uploaded image
+image = Image.open(image_path)
+
+# Mirror the image
+mirrored_image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+# Display the original and mirrored images
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 5))
+
+plt.subplot(1, 2, 1)
+plt.imshow(image)
+plt.title('Original Image')
+plt.axis('off')
+
+plt.subplot(1, 2, 2)
+plt.imshow(mirrored_image)
+plt.title('Mirrored Image')
+plt.axis('off')
+
+plt.show()
