@@ -1,0 +1,33 @@
+TURTLEBOT3: 
+SETUP: 
+Download link: 
+https://github.com/SakshayMahna/Robotics-Playground/tree/main/turtlebot3_ws 
+Unzip into home dir. 
+Open terminal 
+roscore 
+Open another terminal 
+sudo apt-get install ros-noetic-navigation 
+Open another terminal 
+cd 
+turtlebot3_ws/ 
+catkin_make 
+source devel/setup.bash 
+
+TO RUN TURTLEBOT3: 
+Terminal 1 
+roscore 
+Terminal 2 
+cd turtlebot3_ws/ 
+catkin_make 
+source devel/setup.bash 
+roslaunch ros_world turtlebot3_world.launch 
+Terminal 3 
+cd turtlebot3_ws/
+			catkin_make 
+source devel/setup.bash 
+roslaunch global_path_planning turtlebot3_ros_world.launch 
+Terminal 4 
+cd turtlebot3_ws/ 
+catkin_make 
+source devel/setup.bash 
+rosrun global_path_planning path_planning_server.py
