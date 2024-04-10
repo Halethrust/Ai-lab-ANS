@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+
+import rospy
+from std_msgs.msg import Int32MultiArray
+
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+
+def publish_sorted_array(arr):
+    pub = rospy.Publisher('sorted_array', Int32MultiArray, queue_size=10)
+    rospy.init_node('array_sorter', anonymous=True)
+    rate = rospy.Rate(1)  # 1 Hz
+
+    while not rospy.is_shutdown():
+        bubble_sort(arr)
+        sorted_array_msg = Int32MultiArray(data=arr)
+        pub.publish(sorted_array_msg)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        arr = [5, 2, 8, 7, 1]
+        rospy.loginfo("Original array: %s", arr)
+        publish_sorted_array(arr)
+    except rospy.ROSInterruptException:
+        pass
